@@ -114,6 +114,34 @@ app.post('/api/check-payment', async (req, res) => {
   }
 });
 
+// New route to mark a code as used and update plans.json
+app.post('/api/use-code', (req, res) => {
+  const { planName } = req.body;
+
+  fs.readFile('plans.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading plans.json:", err);
+      return res.status(500).json({ error: 'Failed to read plans' });
+    }
+
+    let plansData = JSON.parse(data);
+    const plan = plansData.plans.find(p => p.name === planName);
+
+    if (plan && plan.codes && plan.codes.length > 0) {
+      plan.codes.shift(); // remove one code from the top
+      fs.writeFile('plans.json', JSON.stringify(plansData, null, 2), (err) => {
+        if (err) {
+          console.error("Error writing plans.json:", err);
+          return res.status(500).json({ error: 'Failed to update plans' });
+        }
+        res.json({ success: true });
+      });
+    } else {
+      res.status(400).json({ error: 'Plan not found or no codes left' });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
