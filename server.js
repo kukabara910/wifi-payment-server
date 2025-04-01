@@ -1,15 +1,20 @@
 // server.js
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const fetch = require('node-fetch');
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Enable CORS for all requests
+// Enable CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -30,17 +35,18 @@ app.get('/api/plans', (req, res) => {
   });
 });
 
+// Network/token/wallet config
 const config = {
   base: {
     address: '0xD42aeDC8B3aF24192288602892D3F77a4Ef6dAc8',
-    usdt: '0x...',
-    usdc: '0x...',
+    usdt: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
+    usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     explorer: 'https://basescan.org/tx/'
   },
   ethereum: {
     address: '0xD42aeDC8B3aF24192288602892D3F77a4Ef6dAc8',
     usdt: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-    usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    usdc: '0xa0b86991c6218b36c1d19D4a2e9eb0ce3606eb48',
     explorer: 'https://etherscan.io/tx/'
   },
   bsc: {
