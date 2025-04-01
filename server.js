@@ -78,7 +78,7 @@ app.post('/api/check-payment', async (req, res) => {
   const apiBase = etherscanAPIs[network];
   const wallet = settings.address;
   const explorer = settings.explorer;
-  const apiKey = 'YOUR_API_KEY'; // Replace with real API key
+  const apiKey = 'YOUR_API_KEY'; 'PCVR7QFBPK3KTE5PJZZ6QWSWGE4FSHDHUY';
 
   const url = `${apiBase}/api?module=account&action=tokentx&contractaddress=${tokenAddress}&address=${wallet}&sort=desc&apikey=${apiKey}`;
 
