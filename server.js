@@ -68,7 +68,7 @@ const etherscanAPIs = {
 };
 
 app.post('/api/check-payment', async (req, res) => {
-  const { network, token, expectedTokenAmount } = req.body;
+  const { network, token, expectedTokenAmount, plan } = req.body;
   console.log('Received payment check request:', req.body);
 
   if (network === 'solana') {
@@ -99,6 +99,18 @@ app.post('/api/check-payment', async (req, res) => {
     });
 
     if (match) {
+      // If match, remove code immediately from the list
+      fs.readFile('plans.json', 'utf8', (err, jsonData) => {
+        if (!err) {
+          let plans = JSON.parse(jsonData);
+          const foundPlan = plans.plans.find(p => p.name === plan);
+          if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
+            foundPlan.codes.shift();
+            fs.writeFile('plans.json', JSON.stringify(plans, null, 2), () => {});
+          }
+        }
+      });
+
       return res.json({
         success: true,
         message: 'Payment verified',
@@ -128,7 +140,7 @@ app.post('/api/use-code', (req, res) => {
     const plan = plansData.plans.find(p => p.name === planName);
 
     if (plan && plan.codes && plan.codes.length > 0) {
-      plan.codes.shift(); // remove one code from the top
+      plan.codes.shift();
       fs.writeFile('plans.json', JSON.stringify(plansData, null, 2), (err) => {
         if (err) {
           console.error("Error writing plans.json:", err);
