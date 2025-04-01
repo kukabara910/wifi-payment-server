@@ -24,11 +24,11 @@ app.use((req, res, next) => {
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Load available plans from plans.json
+// Load available plans from wifi_plans.json
 app.get('/api/plans', (req, res) => {
-  fs.readFile('plans.json', 'utf8', (err, data) => {
+  fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
     if (err) {
-      console.error("Error reading plans.json:", err);
+      console.error("Error reading wifi_plans.json:", err);
       return res.status(500).json({ error: 'Failed to load plans' });
     }
     res.json(JSON.parse(data));
@@ -100,13 +100,13 @@ app.post('/api/check-payment', async (req, res) => {
 
     if (match) {
       // If match, remove code immediately from the list
-      fs.readFile('plans.json', 'utf8', (err, jsonData) => {
+      fs.readFile('wifi_plans.json', 'utf8', (err, jsonData) => {
         if (!err) {
           let plans = JSON.parse(jsonData);
           const foundPlan = plans.plans.find(p => p.name === plan);
           if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
             foundPlan.codes.shift();
-            fs.writeFile('plans.json', JSON.stringify(plans, null, 2), () => {});
+            fs.writeFile('wifi_plans.json', JSON.stringify(plans, null, 2), () => {});
           }
         }
       });
@@ -126,13 +126,13 @@ app.post('/api/check-payment', async (req, res) => {
   }
 });
 
-// New route to mark a code as used and update plans.json
+// New route to mark a code as used and update wifi_plans.json
 app.post('/api/use-code', (req, res) => {
   const { planName } = req.body;
 
-  fs.readFile('plans.json', 'utf8', (err, data) => {
+  fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
     if (err) {
-      console.error("Error reading plans.json:", err);
+      console.error("Error reading wifi_plans.json:", err);
       return res.status(500).json({ error: 'Failed to read plans' });
     }
 
@@ -141,9 +141,9 @@ app.post('/api/use-code', (req, res) => {
 
     if (plan && plan.codes && plan.codes.length > 0) {
       plan.codes.shift();
-      fs.writeFile('plans.json', JSON.stringify(plansData, null, 2), (err) => {
+      fs.writeFile('wifi_plans.json', JSON.stringify(plansData, null, 2), (err) => {
         if (err) {
-          console.error("Error writing plans.json:", err);
+          console.error("Error writing wifi_plans.json:", err);
           return res.status(500).json({ error: 'Failed to update plans' });
         }
         res.json({ success: true });
