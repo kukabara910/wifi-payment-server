@@ -99,31 +99,27 @@ app.post('/api/check-payment', async (req, res) => {
     });
 
     if (match) {
-      fs.readFile('wifi_plans.json', 'utf8', (err, jsonData) => {
-        if (!err) {
-          try {
-            let plans = JSON.parse(jsonData);
-            const foundPlan = plans.plans.find(p => p.name === plan);
-            if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
-              foundPlan.codes.shift();
-              const filePath = path.join(__dirname, 'wifi_plans.json');
-              console.log("Attempting to update wifi_plans.json at:", filePath);
+      const codeRemoved = await new Promise((resolve, reject) => {
+        fs.readFile('wifi_plans.json', 'utf8', (err, jsonData) => {
+          if (err) return reject(err);
 
-              fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
-                if (err) {
-                  console.error("Error writing to wifi_plans.json:", err);
-                } else {
-                  console.log("Successfully updated wifi_plans.json. Updated data:", JSON.stringify(plans, null, 2));
-                }
-              });
-            }
-          } catch (e) {
-            console.error("Error processing JSON data inside try block:", e);
+          let plans = JSON.parse(jsonData);
+          const foundPlan = plans.plans.find(p => p.name === plan);
+
+          if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
+            foundPlan.codes.shift();
+            const filePath = path.join(__dirname, 'wifi_plans.json');
+            fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
+              if (err) return reject(err);
+              resolve(true);
+            });
+          } else {
+            resolve(false);
           }
-        } else {
-          console.error("Failed to read wifi_plans.json during payment match:", err);
-        }
+        });
       });
+
+      console.log("Code updated in wifi_plans.json?:", codeRemoved);
 
       return res.json({
         success: true,
