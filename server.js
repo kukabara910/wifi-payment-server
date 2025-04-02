@@ -141,39 +141,37 @@ app.post('/api/use-code', (req, res) => {
 
     if (plan && plan.codes && plan.codes.length > 0) {
       plan.codes.shift();
-      fs.writeFile('wifi_plans.json', JSON.stringify(plansData, null, 2), (err) => {
-        if (err) {
-          console.error("Error writing wifi_plans.json:", err);
-          return res.status(500).json({ error: 'Failed to update plans' });
-        }
-        res.json({ success: true });
-      });
-    } else {
-      res.status(400).json({ error: 'Plan not found or no codes left' });
-    }
-  });
-});
-app.post('/api/use-code', (req, res) => {
+     app.post('/api/use-code', (req, res) => {
   const { planName } = req.body;
+
+  console.log(`Received request to decrement code for plan: ${planName}`);
+
+  // Read the wifi_plans.json file
   fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
     if (err) {
       console.error("Failed to read wifi_plans.json:", err);
-      return res.status(500).json({ success: false });
+      return res.status(500).json({ success: false, message: 'Error reading plans' });
     }
 
-    let plans = JSON.parse(data).plans;
-    const plan = plans.find(p => p.name === planName);
+    let plansData = JSON.parse(data);
+    const plan = plansData.plans.find(p => p.name === planName);
+
     if (plan && plan.codes.length > 0) {
-      plan.codes.shift(); // remove the first code
-      fs.writeFile('wifi_plans.json', JSON.stringify({ plans }, null, 2), err => {
+      const removedCode = plan.codes.shift(); // Remove the first code
+      console.log(`Removed code: ${removedCode}. Remaining codes: ${plan.codes}`);
+
+      // Write the updated data back to wifi_plans.json
+      fs.writeFile('wifi_plans.json', JSON.stringify(plansData, null, 2), (err) => {
         if (err) {
-          console.error("Failed to write updated codes:", err);
-          return res.status(500).json({ success: false });
+          console.error("Failed to update wifi_plans.json:", err);
+          return res.status(500).json({ success: false, message: 'Error updating plans' });
         }
-        return res.json({ success: true });
+        console.log("Successfully updated wifi_plans.json");
+        return res.json({ success: true, remainingCodes: plan.codes.length });
       });
     } else {
-      return res.status(400).json({ success: false, message: 'No codes left or plan not found' });
+      console.warn("Plan not found or no codes left to remove");
+      return res.status(400).json({ success: false, message: 'Plan not found or no codes left' });
     }
   });
 });
