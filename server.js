@@ -102,11 +102,21 @@ app.post('/api/check-payment', async (req, res) => {
       // If match, remove code immediately from the list
       fs.readFile('wifi_plans.json', 'utf8', (err, jsonData) => {
         if (!err) {
+        try {
           let plans = JSON.parse(jsonData);
           const foundPlan = plans.plans.find(p => p.name === plan);
           if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
             foundPlan.codes.shift();
-            fs.writeFile('wifi_plans.json', JSON.stringify(plans, null, 2), () => {});
+            const filePath = path.join(__dirname, 'wifi_plans.json'); // Ensure correct file path
+console.log("Attempting to update wifi_plans.json at:", filePath);
+
+fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
+  if (err) {
+    console.error("Error writing to wifi_plans.json:", err);
+  } else {
+    console.log("Successfully updated wifi_plans.json. Updated data:", JSON.stringify(plans, null, 2));
+  }
+});
           }
         }
       });
