@@ -99,25 +99,29 @@ app.post('/api/check-payment', async (req, res) => {
     });
 
     if (match) {
-      // If match, remove code immediately from the list
       fs.readFile('wifi_plans.json', 'utf8', (err, jsonData) => {
         if (!err) {
-        try {
-          let plans = JSON.parse(jsonData);
-          const foundPlan = plans.plans.find(p => p.name === plan);
-          if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
-            foundPlan.codes.shift();
-            const filePath = path.join(__dirname, 'wifi_plans.json'); // Ensure correct file path
-console.log("Attempting to update wifi_plans.json at:", filePath);
+          try {
+            let plans = JSON.parse(jsonData);
+            const foundPlan = plans.plans.find(p => p.name === plan);
+            if (foundPlan && foundPlan.codes && foundPlan.codes.length > 0) {
+              foundPlan.codes.shift();
+              const filePath = path.join(__dirname, 'wifi_plans.json');
+              console.log("Attempting to update wifi_plans.json at:", filePath);
 
-fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
-  if (err) {
-    console.error("Error writing to wifi_plans.json:", err);
-  } else {
-    console.log("Successfully updated wifi_plans.json. Updated data:", JSON.stringify(plans, null, 2));
-  }
-});
+              fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
+                if (err) {
+                  console.error("Error writing to wifi_plans.json:", err);
+                } else {
+                  console.log("Successfully updated wifi_plans.json. Updated data:", JSON.stringify(plans, null, 2));
+                }
+              });
+            }
+          } catch (e) {
+            console.error("Error processing JSON data inside try block:", e);
           }
+        } else {
+          console.error("Failed to read wifi_plans.json during payment match:", err);
         }
       });
 
@@ -136,14 +140,11 @@ fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
   }
 });
 
-// New route to mark a code as used and update wifi_plans.json
-
-     app.post('/api/use-code', (req, res) => {
+app.post('/api/use-code', (req, res) => {
   const { planName } = req.body;
 
   console.log(`Received request to decrement code for plan: ${planName}`);
 
-  // Read the wifi_plans.json file
   fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
     if (err) {
       console.error("Failed to read wifi_plans.json:", err);
@@ -154,10 +155,9 @@ fs.writeFile(filePath, JSON.stringify(plans, null, 2), (err) => {
     const plan = plansData.plans.find(p => p.name === planName);
 
     if (plan && plan.codes.length > 0) {
-      const removedCode = plan.codes.shift(); // Remove the first code
+      const removedCode = plan.codes.shift();
       console.log(`Removed code: ${removedCode}. Remaining codes: ${plan.codes}`);
 
-      // Write the updated data back to wifi_plans.json
       fs.writeFile('wifi_plans.json', JSON.stringify(plansData, null, 2), (err) => {
         if (err) {
           console.error("Failed to update wifi_plans.json:", err);
