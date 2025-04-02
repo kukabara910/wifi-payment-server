@@ -153,6 +153,30 @@ app.post('/api/use-code', (req, res) => {
     }
   });
 });
+app.post('/api/use-code', (req, res) => {
+  const { planName } = req.body;
+  fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error("Failed to read wifi_plans.json:", err);
+      return res.status(500).json({ success: false });
+    }
+
+    let plans = JSON.parse(data).plans;
+    const plan = plans.find(p => p.name === planName);
+    if (plan && plan.codes.length > 0) {
+      plan.codes.shift(); // remove the first code
+      fs.writeFile('wifi_plans.json', JSON.stringify({ plans }, null, 2), err => {
+        if (err) {
+          console.error("Failed to write updated codes:", err);
+          return res.status(500).json({ success: false });
+        }
+        return res.json({ success: true });
+      });
+    } else {
+      return res.status(400).json({ success: false, message: 'No codes left or plan not found' });
+    }
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
