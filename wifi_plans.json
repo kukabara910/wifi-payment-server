@@ -1,1 +1,1 @@
-{"plans":[{"id":0,"name":"test","price":"1","duration":"24 hours","codes":[['666','555','444','333','222','111']]}]}
+{"plans":[{"id":0,"name":"test","price":"1","duration":"24 hours","codes":["111","222","333","444","555","666"]]}]}
