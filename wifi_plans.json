@@ -1,3 +1,1 @@
-plan_codes = ["111","222","333","444","555","666"]
-plan_codes.reverse()
-{"plans":[{"id":0,"name":"test","price":"1","duration":"24 hours","codes":plan_codes}]}
+{"plans":[{"id":0,"name":"test","price":"1","duration":"24 hours","codes":[['666','555','444','333','222','111']]}]}
