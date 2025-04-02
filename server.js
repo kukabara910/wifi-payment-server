@@ -127,20 +127,7 @@ app.post('/api/check-payment', async (req, res) => {
 });
 
 // New route to mark a code as used and update wifi_plans.json
-app.post('/api/use-code', (req, res) => {
-  const { planName } = req.body;
 
-  fs.readFile('wifi_plans.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error("Error reading wifi_plans.json:", err);
-      return res.status(500).json({ error: 'Failed to read plans' });
-    }
-
-    let plansData = JSON.parse(data);
-    const plan = plansData.plans.find(p => p.name === planName);
-
-    if (plan && plan.codes && plan.codes.length > 0) {
-      plan.codes.shift();
      app.post('/api/use-code', (req, res) => {
   const { planName } = req.body;
 
